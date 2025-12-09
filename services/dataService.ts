@@ -82,7 +82,7 @@ export const submitAssessment = async (
   userId: string | null,
   qrNo?: string | null
 ): Promise<boolean> => {
-  const apiBase = (typeof import.meta !== 'undefined' && process.env.VITE_API_BASE) ? process.env.VITE_API_BASE : '';
+  const apiBase = (typeof import.meta !== 'undefined' && process.env.VITE_API_BASE) ? process.env.VITE_API_BASE : 'https://kauverynalam-ccechsb6dwdhc5eg.southindia-01.azurewebsites.net';
   const apiUrl = `${apiBase}/api/assessment`;
 
   if (!userId) {
