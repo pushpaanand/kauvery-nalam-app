@@ -52,16 +52,16 @@ app.use(express.json());
 
 // CRM config — keep secrets out of code; set via env vars.
 const CRM_BASE_URL = process.env.CRM_BASE_URL || 'https://api-in21.leadsquared.com/v2/OpportunityManagement.svc/Capture';
-const CRM_ACCESS_KEY = process.env.CRM_ACCESS_KEY || 'SET_ME';
-const CRM_SECRET_KEY = process.env.CRM_SECRET_KEY || 'SET_ME';
+const CRM_ACCESS_KEY = process.env.CRM_ACCESS_KEY || 'u$r2b2685aad83c93ae18c6775987c2d01a';
+const CRM_SECRET_KEY = process.env.CRM_SECRET_KEY || '133b398d3129a2bc1b6975a244c03966bf974972';
 const ENABLE_CRM = process.env.ENABLE_CRM === 'true';
 
 // SQL config (ENV driven)
 const sqlConfig = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER, // e.g., "myserver.database.windows.net"
-  database: process.env.DB_NAME,
+  user: process.env.DB_USER || 'KauveryNalam',
+  password: process.env.DB_PASSWORD || 'kauvery@123',
+  server: process.env.DB_SERVER || 'kauverynalam.database.windows.net', // e.g., "myserver.database.windows.net"
+  database: process.env.DB_NAME || 'kauverynalamdb',
   options: {
     encrypt: true,
     trustServerCertificate: process.env.DB_TRUST_CERT === 'true'

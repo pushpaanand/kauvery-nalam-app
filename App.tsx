@@ -61,7 +61,7 @@ const App: React.FC = () => {
     setState(prev => ({ ...prev, qrNo: qrParam }));
 
     // Fetch QR config from backend
-    const apiBase = process.env.VITE_API_BASE ? process.env.VITE_API_BASE : 'https://kauverynalam-ccechsb6dwdhc5eg.southindia-01.azurewebsites.net';
+    const apiBase = process.env.VITE_API_BASE ? process.env.VITE_API_BASE : '';
     const apiUrl = `${apiBase}/api/qr-config?qr=${encodeURIComponent(qrParam)}`;
     
     console.log('Fetching QR config from:', apiUrl);
