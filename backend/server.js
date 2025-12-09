@@ -373,8 +373,21 @@ app.post('/api/assessment', async (req, res) => {
   });
 });
 
+app.use(express.static(path.join(__dirname, "..", "dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "dist", "index.html"));
+});
+
+// Azure App Service sets PORT automatically, use it or default to 4000 for local dev
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`QR backend listening on port ${PORT}`);
+const HOST = process.env.WEBSITE_HOSTNAME ? '0.0.0.0' : 'localhost';
+
+app.listen(PORT, HOST, () => {
+  console.log(`QR backend listening on ${HOST}:${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  if (process.env.WEBSITE_SITE_NAME) {
+    console.log(`Azure App Service: ${process.env.WEBSITE_SITE_NAME}`);
+  }
 });
 

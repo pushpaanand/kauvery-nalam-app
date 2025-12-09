@@ -1,0 +1,7 @@
+# iisnode.yml - Configuration for iisnode on Azure App Service
+loggingEnabled: true
+logDirectory: iisnode
+debuggingEnabled: false
+devErrorsEnabled: false
+nodeProcessCommandLine: "node"
+
