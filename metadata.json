@@ -1,0 +1,7 @@
+{
+  "name": "Kauvery Nalam - Kidney Health",
+  "description": "Mobile-first kidney health risk assessment application with multi-language support and automated unit tracking.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
