@@ -11,6 +11,7 @@ const express = require('express');
 const cors = require('cors');
 const sql = require('mssql');
 const https = require('https');
+const path = require('path');
 
 // Create an HTTPS agent that handles SSL certificates
 // For production, you should use proper certificates, but for now we'll allow self-signed
