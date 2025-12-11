@@ -375,7 +375,7 @@ const App: React.FC = () => {
           <h1 className="text-2xl font-bold text-red-600 mb-4">Invalid Access</h1>
           <p className="text-gray-700 mb-2">{qrError || 'QR parameter is required'}</p>
           <p className="text-sm text-gray-500 mb-4">Please scan a valid QR code to access this assessment.</p>
-          <p className="text-xs text-gray-400">URL format: <code className="bg-gray-100 px-2 py-1 rounded">?qr=KH05</code></p>
+          {/* <p className="text-xs text-gray-400">URL format: <code className="bg-gray-100 px-2 py-1 rounded">?qr=KH05</code></p> */}
         </div>
       </div>
     );
@@ -451,6 +451,7 @@ const App: React.FC = () => {
               answers={state.answers} 
               lang={state.language}
               mode={state.mode}
+              qrNo={state.qrNo}
               onRestart={handleRestart}
             />
           ) : !state.isUserInfoCollected ? (
