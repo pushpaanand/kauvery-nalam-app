@@ -139,15 +139,16 @@ export const UserInfoForm: React.FC<Props> = ({ lang, onSubmit }) => {
     if (!dob || age === null) newErrors.dob = TEXTS.reqField[lang];
     if (!location.trim()) newErrors.location = TEXTS.reqField[lang];
 
-    // Strict regex checks
-    if (phone && !/^[6-9]\d{9}$/.test(phone)) newErrors.phone = TEXTS.invalidPhone[lang];
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = TEXTS.invalidEmail[lang];
+    // Phone is mandatory
+    if (!phone || !phone.trim()) {
+      newErrors.phone = TEXTS.reqField[lang];
+    } else if (!/^[6-9]\d{9}$/.test(phone)) {
+      newErrors.phone = TEXTS.invalidPhone[lang];
+    }
     
-    // Either/Or Requirement
-    if (!phone && !email) newErrors.contact = TEXTS.errorContact[lang];
-    // If one is present but invalid, contact error shouldn't override specific error
-    if ((phone && newErrors.phone) || (email && newErrors.email)) {
-       delete newErrors.contact; 
+    // Email is optional, but if provided, must be valid
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = TEXTS.invalidEmail[lang];
     }
 
     setErrors(newErrors);
@@ -328,7 +329,7 @@ export const UserInfoForm: React.FC<Props> = ({ lang, onSubmit }) => {
           </label>
           
           <div className="space-y-4">
-            {/* Phone */}
+            {/* Phone - Mandatory */}
             <div className="space-y-1.5">
                <div className="relative group">
                   <div className={`absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center transition-colors z-10 ${errors.phone ? 'text-red-400' : !!phone && !errors.phone ? 'text-green-500' : 'text-gray-400'}`}>
@@ -349,7 +350,6 @@ export const UserInfoForm: React.FC<Props> = ({ lang, onSubmit }) => {
                        setPhone(val);
                        // Clear error if user is typing, validate on blur
                        if (errors.phone) setErrors(prev => { const p = {...prev}; delete p.phone; return p; });
-                       if (errors.contact) setErrors(prev => { const p = {...prev}; delete p.contact; return p; });
                     }}
                     onBlur={() => handleBlur('phone', phone)}
                     className={`w-full bg-gray-50 border-2 rounded-xl py-3.5 pl-[4.5rem] pr-10 text-gray-900 font-mono font-bold text-lg outline-none transition-all tracking-wide
@@ -371,14 +371,9 @@ export const UserInfoForm: React.FC<Props> = ({ lang, onSubmit }) => {
                )}
             </div>
 
-            <div className="relative flex items-center justify-center py-1">
-              <span className="bg-white px-3 text-[10px] text-gray-400 font-bold uppercase tracking-widest relative z-10">OR</span>
-              <div className="absolute inset-0 h-px bg-gray-100 top-1/2 -translate-y-1/2 -z-0"></div>
-            </div>
-
-            {/* Email */}
+            {/* Email - Optional */}
             <InputGroup 
-               label={TEXTS.emailLabel[lang]} 
+               label={`${TEXTS.emailLabel[lang]} ${lang === 'en' ? '(Optional)' : '(விருப்பமானது)'}`}
                icon={Mail} 
                error={errors.email}
                isValid={!!email && !errors.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)}
@@ -389,7 +384,6 @@ export const UserInfoForm: React.FC<Props> = ({ lang, onSubmit }) => {
                 onChange={(e) => { 
                    setEmail(e.target.value); 
                    if (errors.email) setErrors(prev => { const p = {...prev}; delete p.email; return p; });
-                   if (errors.contact) setErrors(prev => { const p = {...prev}; delete p.contact; return p; });
                 }}
                 onBlur={() => handleBlur('email', email)}
                 className={`w-full bg-gray-50 border-2 rounded-xl py-3.5 pl-12 pr-10 text-gray-900 font-medium outline-none transition-all
@@ -399,18 +393,6 @@ export const UserInfoForm: React.FC<Props> = ({ lang, onSubmit }) => {
                 placeholder=""
               />
             </InputGroup>
-            
-            {/* Global Contact Error (If neither provided) */}
-            {errors.contact && !errors.phone && !errors.email && (
-              <motion.div 
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-red-50 p-3 rounded-xl border border-red-100 flex items-center gap-2"
-              >
-                 <AlertCircle size={16} className="text-red-500" />
-                 <p className="text-xs text-red-600 font-bold">{errors.contact}</p>
-              </motion.div>
-            )}
           </div>
         </div>
       </div>

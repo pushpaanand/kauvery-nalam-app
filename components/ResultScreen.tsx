@@ -16,7 +16,8 @@ import {
   Check,
   User,
   Users,
-  Clock
+  Clock,
+  MessageCircle
 } from 'lucide-react';
 
 interface Props {
@@ -102,6 +103,20 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, onR
     }
   };
 
+  const handleWhatsAppShare = () => {
+    if (reportLink) {
+      triggerHaptic('medium');
+      // Create WhatsApp share message
+      const message = lang === 'ta' 
+        ? `காவேரி நலம் - சிறுநீரக நல மதிப்பீடு\n\n${reportLink}`
+        : `Kauvery Nalam - Kidney Health Assessment\n\n${reportLink}`;
+      
+      // Open WhatsApp with the message
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    }
+  };
+
   // --- RENDER HELPERS ---
   const SafetySection = ({ title, list }: { title: string, list: any[] }) => (
     <motion.div 
@@ -129,6 +144,31 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, onR
 
   const CtaSection = () => (
     <div className="space-y-3 mt-8">
+      {/* Share Section */}
+      {reportLink && (
+        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm mb-4">
+          <p className="text-xs font-bold text-gray-600 mb-3 text-center uppercase tracking-wider">
+            {lang === 'ta' ? 'பகிரவும்' : 'Share Report'}
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={handleCopyLink}
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl text-sm font-bold transition-colors border border-gray-200 active:scale-95"
+            >
+              {copied ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
+              {copied ? (lang === 'ta' ? 'நகலெடுக்கப்பட்டது' : 'Copied') : (lang === 'ta' ? 'நகலெடு' : 'Copy Link')}
+            </button>
+            <button
+              onClick={handleWhatsAppShare}
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-xl text-sm font-bold transition-colors shadow-md active:scale-95"
+            >
+              <MessageCircle size={16} />
+              {lang === 'ta' ? 'WhatsApp' : 'WhatsApp'}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Dynamic Main Action Button */}
       <motion.button 
         whileTap={{ scale: 0.98 }}
@@ -238,6 +278,13 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, onR
                 >
                   {copied ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
                   {copied ? 'Copied' : 'Copy Link'}
+                </button>
+                <button
+                  onClick={handleWhatsAppShare}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-xl text-xs font-bold transition-colors shadow-sm"
+                >
+                  <MessageCircle size={14} />
+                  {lang === 'ta' ? 'WhatsApp' : 'WhatsApp'}
                 </button>
               </div>
 

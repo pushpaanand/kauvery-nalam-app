@@ -51,17 +51,37 @@ app.use(cors());
 app.use(express.json());
 
 // CRM config — keep secrets out of code; set via env vars.
-const CRM_BASE_URL = process.env.CRM_BASE_URL || 'https://api-in21.leadsquared.com/v2/OpportunityManagement.svc/Capture';
-const CRM_ACCESS_KEY = process.env.CRM_ACCESS_KEY || 'u$r2b2685aad83c93ae18c6775987c2d01a';
-const CRM_SECRET_KEY = process.env.CRM_SECRET_KEY || '133b398d3129a2bc1b6975a244c03966bf974972';
-const ENABLE_CRM = process.env.ENABLE_CRM === 'true';
+// const CRM_BASE_URL = process.env.CRM_BASE_URL || 'https://api-in21.leadsquared.com/v2/OpportunityManagement.svc/Capture';
+// const CRM_ACCESS_KEY = process.env.CRM_ACCESS_KEY || 'u$r2b2685aad83c93ae18c6775987c2d01a';
+// const CRM_SECRET_KEY = process.env.CRM_SECRET_KEY || '133b398d3129a2bc1b6975a244c03966bf974972';
+// const ENABLE_CRM = process.env.ENABLE_CRM === 'true';
+const CRM_BASE_URL = 'https://api-in21.leadsquared.com/v2/OpportunityManagement.svc/Capture';
+const CRM_ACCESS_KEY = 'u$r2b2685aad83c93ae18c6775987c2d01a';
+const CRM_SECRET_KEY = '133b398d3129a2bc1b6975a244c03966bf974972';
+const ENABLE_CRM = true;
 
 // SQL config (ENV driven)
+// const sqlConfig = {
+//   user: process.env.DB_USER || 'KauveryNalam',
+//   password: process.env.DB_PASSWORD || 'kauvery@123',
+//   server: process.env.DB_SERVER || 'kauverynalam.database.windows.net', // e.g., "myserver.database.windows.net"
+//   database: process.env.DB_NAME || 'kauverynalamdb',
+//   options: {
+//     encrypt: true,
+//     trustServerCertificate: process.env.DB_TRUST_CERT === 'true'
+//   },
+//   pool: {
+//     max: 10,
+//     min: 0,
+//     idleTimeoutMillis: 30000
+//   }
+// };
+
 const sqlConfig = {
-  user: process.env.DB_USER || 'KauveryNalam',
-  password: process.env.DB_PASSWORD || 'kauvery@123',
-  server: process.env.DB_SERVER || 'kauverynalam.database.windows.net', // e.g., "myserver.database.windows.net"
-  database: process.env.DB_NAME || 'kauverynalamdb',
+  user: 'KauveryNalam',
+  password: 'kauvery@123',
+  server: 'kauverynalam.database.windows.net', // e.g., "myserver.database.windows.net"
+  database: 'kauverynalamdb',
   options: {
     encrypt: true,
     trustServerCertificate: process.env.DB_TRUST_CERT === 'true'
@@ -72,7 +92,6 @@ const sqlConfig = {
     idleTimeoutMillis: 30000
   }
 };
-
 // Validate database configuration
 if (!sqlConfig.server || !sqlConfig.user || !sqlConfig.password || !sqlConfig.database) {
   console.error('❌ Database configuration missing!');
@@ -217,9 +236,13 @@ app.post('/api/assessment', async (req, res) => {
       { Attribute: 'FirstName', Value: firstName }
     ];
 
-    // Only add fields that have values
+    // Phone is mandatory - always include
     if (user?.phone) {
       leadDetails.push({ Attribute: 'Phone', Value: user.phone });
+    }
+    // Email is optional - add EmailAddress after Phone
+    if (user?.email) {
+      leadDetails.push({ Attribute: 'EmailAddress', Value: user.email });
     }
     if (user?.dob) {
       leadDetails.push({ Attribute: 'mx_Date_of_Birth', Value: user.dob });
@@ -251,6 +274,7 @@ app.post('/api/assessment', async (req, res) => {
           { SchemaName: 'mx_Custom_1', Value: `${firstName || fullName} - K Nalam Opportunity` },
           { SchemaName: 'mx_Custom_26', Value: 'Campaign' },
           { SchemaName: 'mx_Custom_52', Value: 'Survey - Landing Page' },
+          { SchemaName: 'mx_Custom_56', Value: 'K Nalam - Kidney' },
           { SchemaName: 'Owner', Value: 'helpdesk@kauveryhospital.com' },
           { SchemaName: 'mx_Custom_12', Value: cfg.location || '' },
           { SchemaName: 'mx_Custom_13', Value: 'Nephrology' },

@@ -197,7 +197,7 @@ export const TEXTS: Record<string, LocalizedString> = {
   nameLabel: { en: 'Full Name', ta: 'முழு பெயர்' },
   dobLabel: { en: 'Date of Birth', ta: 'பிறந்த தேதி' },
   ageLabel: { en: 'Age', ta: 'வயது' },
-  contactTitle: { en: 'Contact Details (Either one is required)', ta: 'தொடர்பு விவரங்கள் (ஏதேனும் ஒன்று தேவை)' },
+  contactTitle: { en: 'Contact Details', ta: 'தொடர்பு விவரங்கள்' },
   phoneLabel: { en: 'Phone Number', ta: 'அலைபேசி எண்' },
   emailLabel: { en: 'Email Address', ta: 'மின்னஞ்சல்' },
   locationLabel: { en: 'Current Location', ta: 'தற்போதைய இடம்' },

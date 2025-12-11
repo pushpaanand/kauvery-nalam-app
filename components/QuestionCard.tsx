@@ -87,15 +87,6 @@ export const QuestionCard: React.FC<Props> = ({ question, lang, onAnswer, onBack
           <h3 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-4 leading-tight tracking-tight">
             {question.label[lang]}
           </h3>
-          
-          {/* 
-             Fixed Secondary Language Container 
-          */}
-          <div className="inline-block bg-white/80 border border-gray-200 px-4 py-3 rounded-xl shadow-sm max-w-full">
-             <p className="text-sm md:text-base text-gray-600 font-medium leading-relaxed font-sans">
-               {question.label[lang === 'en' ? 'ta' : 'en']}
-             </p>
-          </div>
         </motion.div>
 
         {/* Option Tiles */}
@@ -128,9 +119,6 @@ export const QuestionCard: React.FC<Props> = ({ question, lang, onAnswer, onBack
                 <div className="pl-3 relative z-10 w-full">
                   <div className={`text-lg font-bold ${isSelected ? 'text-kauvery-primaryDark' : 'text-gray-800'}`}>
                     {opt.label[lang]}
-                  </div>
-                  <div className={`text-xs md:text-sm font-semibold mt-1.5 leading-relaxed ${isSelected ? 'text-kauvery-primary/80' : 'text-gray-400'}`}>
-                    {opt.label[lang === 'en' ? 'ta' : 'en']}
                   </div>
                 </div>
 
