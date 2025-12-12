@@ -56,7 +56,7 @@ export const LanguageSelector: React.FC<Props> = ({ currentLang, onToggleLang, o
               Kauvery Nalam
             </h2>
             <p className="text-gray-500 font-medium leading-relaxed mb-1">
-              {currentLang === 'en' ? 'Kidney Health Assessment' : 'சிறுநீரக நல மதிப்பீடு'}
+              {currentLang === 'en' ? 'Start Kidney Health Self Assessment' : 'சிறுநீரக சுயபரிசோதனையைத் தொடங்கவும்'}
             </p>
             <div className="h-1 w-12 bg-kauvery-primary/20 rounded-full mx-auto my-3"></div>
           </motion.div>
