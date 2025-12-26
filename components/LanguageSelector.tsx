@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Language } from '../types';
-import { Globe, ChevronRight, ShieldCheck, Activity } from 'lucide-react';
+import { Globe, ChevronRight, ShieldCheck } from 'lucide-react';
 
 interface Props {
   currentLang: Language;
@@ -46,9 +46,14 @@ export const LanguageSelector: React.FC<Props> = ({ currentLang, onToggleLang, o
             initial={{ scale: 0, rotate: -20 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: 'spring', delay: 0.2 }}
-            className="w-20 h-20 bg-gradient-to-br from-kauvery-primary to-kauvery-secondary rounded-2xl rotate-3 flex items-center justify-center text-white mb-6 shadow-xl shadow-kauvery-primary/20"
+            className="w-32 h-32 bg-white rounded-2xl rotate-3 flex items-center justify-center mb-6 shadow-xl shadow-kauvery-primary/20 overflow-hidden p-3"
           >
-            <Activity size={36} strokeWidth={2} className="-rotate-3" />
+            <img 
+              src="/components/assets/Kauvery_Nalam_Logo.jpg" 
+              alt="Kauvery Nalam Logo" 
+              className="w-full h-full object-contain object-center -rotate-3 scale-110"
+              style={{ imageRendering: 'high-quality' }}
+            />
           </motion.div>
           
           <motion.div variants={itemVariants} className="mb-8">

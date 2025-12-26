@@ -8,7 +8,6 @@ import {
   AlertTriangle, 
   RotateCcw, 
   ShieldCheck, 
-  Activity,
   Maximize2,
   X,
   ScanLine,
@@ -312,8 +311,13 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
               {/* Header */}
               <div className="p-6 flex items-start justify-between border-b border-white/10">
                 <div className="flex items-center gap-3">
-                   <div className="bg-white/20 p-2 rounded-lg backdrop-blur-md">
-                     <Activity size={24} className="text-white" />
+                   <div className="bg-white/20 p-3 rounded-lg backdrop-blur-md">
+                     <img 
+                       src="/components/assets/Kauvery_Nalam_Logo.jpg" 
+                       alt="Kauvery Nalam Logo" 
+                       className="w-10 h-10 object-contain object-center scale-110"
+                       style={{ imageRendering: 'high-quality' }}
+                     />
                    </div>
                    <div>
                      <div className="flex items-center gap-2">

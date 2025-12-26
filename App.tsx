@@ -10,7 +10,6 @@ import { LoadingScreen } from './components/LoadingScreen';
 import { ReportView } from './components/ReportView'; // Import Report View
 import { UserInfoForm } from './components/UserInfoForm'; // Import Form
 import { submitAssessment, generatePriorityCode, createUser } from './services/dataService';
-import { Activity } from 'lucide-react';
 import { triggerHaptic } from './utils/haptics';
 
 const App: React.FC = () => {
@@ -414,8 +413,13 @@ const App: React.FC = () => {
       <header className={`sticky top-0 z-30 transition-all duration-300 ${state.result ? 'bg-transparent' : 'bg-white/90 backdrop-blur-md border-b border-gray-100/50 shadow-sm'}`}>
         <div className="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-             <div className="w-9 h-9 bg-gradient-to-tr from-kauvery-primary to-kauvery-primaryDark rounded-xl flex items-center justify-center text-white shadow-glow transform rotate-3 shrink-0">
-               <Activity size={18} strokeWidth={3} />
+             <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-glow transform rotate-3 shrink-0 overflow-hidden p-2">
+               <img 
+                 src="/components/assets/Kauvery_Nalam_Logo.jpg" 
+                 alt="Kauvery Nalam Logo" 
+                 className="w-full h-full object-contain object-center scale-110"
+                 style={{ imageRendering: 'high-quality' }}
+               />
              </div>
              <div className="flex flex-col">
                <h1 className="text-xs font-extrabold text-gray-900 uppercase tracking-wide leading-none mb-1">

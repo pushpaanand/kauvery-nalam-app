@@ -1,7 +1,7 @@
 import React from 'react';
 import { QUESTIONS } from '../constants';
 import { Language } from '../types';
-import { Activity, Calendar, FileText } from 'lucide-react';
+import { Calendar, FileText } from 'lucide-react';
 
 interface Props {
   dataString: string;
@@ -83,8 +83,13 @@ export const ReportView: React.FC<Props> = ({ dataString }) => {
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 bg-kauvery-primary rounded-xl flex items-center justify-center text-white">
-               <Activity size={20} />
+             <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center overflow-hidden p-2">
+               <img 
+                 src="/components/assets/Kauvery_Nalam_Logo.jpg" 
+                 alt="Kauvery Nalam Logo" 
+                 className="w-full h-full object-contain object-center scale-110"
+                 style={{ imageRendering: 'high-quality' }}
+               />
              </div>
              <div>
                <h1 className="text-sm font-extrabold uppercase text-gray-900 leading-none mb-1">

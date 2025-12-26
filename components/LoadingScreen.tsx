@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Activity } from 'lucide-react';
 
 export const LoadingScreen: React.FC = () => {
   return (
@@ -54,9 +53,14 @@ export const LoadingScreen: React.FC = () => {
             <motion.div
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 1.5, repeat: Infinity }}
-              className="text-kauvery-primary"
+              className="w-20 h-20 bg-white rounded-xl p-3 shadow-lg"
             >
-              <Activity size={32} strokeWidth={2.5} />
+              <img 
+                src="/components/assets/Kauvery_Nalam_Logo.jpg" 
+                alt="Kauvery Nalam Logo" 
+                className="w-full h-full object-contain object-center scale-110"
+                style={{ imageRendering: 'high-quality' }}
+              />
             </motion.div>
           </div>
         </div>
