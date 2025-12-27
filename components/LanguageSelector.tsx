@@ -36,6 +36,31 @@ export const LanguageSelector: React.FC<Props> = ({ currentLang, onToggleLang, o
 
       <div className="bg-white/90 backdrop-blur-3xl rounded-[2.5rem] p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-white relative overflow-hidden w-full">
         
+        {/* Butterfly Logo - Top Right Corner */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: 'spring', delay: 0.4 }}
+          className="absolute top-4 right-4 z-0 w-14 h-12 bg-white/90 backdrop-blur-3xl rounded-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-white overflow-hidden"
+        >
+          {/* Cropped image focusing on butterfly wings - hides white background */}
+          <img 
+            src="/components/assets/butterfly_logo.png" 
+            alt="Butterfly Logo" 
+            className="w-full h-full"
+            style={{ 
+              imageRendering: 'high-quality',
+              objectFit: 'cover',
+              objectPosition: 'center center',
+              transform: 'scale(1.2)',
+              transformOrigin: 'center center'
+            }}
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        </motion.div>
+        
         {/* Decorative sheen */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-kauvery-primary/5 to-transparent rounded-full blur-2xl"></div>
 
@@ -46,19 +71,19 @@ export const LanguageSelector: React.FC<Props> = ({ currentLang, onToggleLang, o
             initial={{ scale: 0, rotate: -20 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: 'spring', delay: 0.2 }}
-            className="w-32 h-32 bg-white rounded-2xl rotate-3 flex items-center justify-center mb-6 shadow-xl shadow-kauvery-primary/20 overflow-hidden p-3"
+            className="w-36 h-36 bg-white rounded-2xl rotate-3 flex items-center justify-center mb-6 shadow-xl shadow-kauvery-primary/20 overflow-hidden p-1"
           >
             <img 
               src="/components/assets/Kauvery_Nalam_Logo.jpg" 
               alt="Kauvery Nalam Logo" 
-              className="w-full h-full object-contain object-center -rotate-3 scale-110"
+              className="w-full h-full object-contain object-center -rotate-3 scale-120"
               style={{ imageRendering: 'high-quality' }}
             />
           </motion.div>
           
           <motion.div variants={itemVariants} className="mb-8">
             <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-2">
-              Kauvery Nalam
+              Nalam by Kauvery
             </h2>
             <p className="text-gray-500 font-medium leading-relaxed mb-1">
               {currentLang === 'en' ? 'Start Kidney Health Self Assessment' : 'சிறுநீரக சுயபரிசோதனையைத் தொடங்கவும்'}

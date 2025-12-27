@@ -417,7 +417,7 @@ const App: React.FC = () => {
                <img 
                  src="/components/assets/Kauvery_Nalam_Logo.jpg" 
                  alt="Kauvery Nalam Logo" 
-                 className="w-full h-full object-contain object-center scale-110"
+                 className="w-full h-full object-contain object-center scale-150"
                  style={{ imageRendering: 'high-quality' }}
                />
              </div>

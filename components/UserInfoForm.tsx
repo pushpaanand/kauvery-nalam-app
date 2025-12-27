@@ -293,16 +293,16 @@ export const UserInfoForm: React.FC<Props> = ({ lang, onSubmit }) => {
           icon={MapPin} 
           error={errors.location}
           isValid={!!location && !errors.location}
-          rightElement={
-            <button
-              onClick={handleDetectLocation}
-              disabled={isLocating}
-              className="bg-white hover:bg-gray-50 text-kauvery-primary text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg shadow-sm border border-gray-100 flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-70"
-            >
-              {isLocating ? <Loader2 size={12} className="animate-spin" /> : <MapPin size={12} />}
-              {isLocating ? '...' : TEXTS.detectBtn[lang]}
-            </button>
-          }
+          // rightElement={
+            // <button
+            //   onClick={handleDetectLocation}
+            //   disabled={isLocating}
+            //   className="bg-white hover:bg-gray-50 text-kauvery-primary text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg shadow-sm border border-gray-100 flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-70"
+            // >
+            //   {isLocating ? <Loader2 size={12} className="animate-spin" /> : <MapPin size={12} />}
+            //   {isLocating ? '...' : TEXTS.detectBtn[lang]}
+            // </button>
+          // }
         >
           <input
             type="text"
