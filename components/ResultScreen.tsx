@@ -18,7 +18,9 @@ import {
   Users,
   Clock,
   MessageCircle,
-  Download
+  Download,
+  Calendar,
+  FileText
 } from 'lucide-react';
 
 interface Props {
@@ -38,6 +40,7 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
   const [copied, setCopied] = useState(false);
   const [priorityCodeCopied, setPriorityCodeCopied] = useState(false);
   const resultContainerRef = useRef<HTMLDivElement>(null);
+  const reportContainerRef = useRef<HTMLDivElement>(null);
 
   const content = RESULT_CONTENT[result.zone];
   const userLabel = mode === 'self' 
@@ -98,17 +101,33 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
   }, [result.zone, result.code, answers, lang, result.timestamp]);
 
   const handleDownloadReport = async () => {
-    if (!resultContainerRef.current) return;
+    if (!reportContainerRef.current) return;
     
     triggerHaptic('medium');
     
     try {
-      const canvas = await html2canvas(resultContainerRef.current, {
+      // Temporarily make the report visible for capture
+      const reportElement = reportContainerRef.current;
+      const originalStyle = reportElement.style.cssText;
+      reportElement.style.position = 'fixed';
+      reportElement.style.left = '0';
+      reportElement.style.top = '0';
+      reportElement.style.visibility = 'visible';
+      reportElement.style.zIndex = '9999';
+      
+      const canvas = await html2canvas(reportElement, {
         backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
-        logging: false
+        logging: false,
+        width: reportElement.scrollWidth,
+        height: reportElement.scrollHeight,
+        windowWidth: reportElement.scrollWidth,
+        windowHeight: reportElement.scrollHeight
       });
+      
+      // Restore original style
+      reportElement.style.cssText = originalStyle;
       
       // Create download link
       const link = document.createElement('a');
@@ -120,6 +139,10 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
     } catch (error) {
       console.error('Download failed', error);
       triggerHaptic('error');
+      // Restore original style on error
+      if (reportContainerRef.current) {
+        reportContainerRef.current.style.cssText = 'position: absolute; visibility: hidden; left: -9999px;';
+      }
     }
   };
 
@@ -574,6 +597,121 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
 
       {/* Common CTA Footer */}
       <CtaSection />
+
+      {/* Hidden Full Report View for Download */}
+      <div 
+        ref={reportContainerRef}
+        className="fixed -left-[9999px] top-0 w-[800px] bg-white"
+        style={{ position: 'absolute', visibility: 'hidden' }}
+      >
+        <div className="min-h-screen bg-gray-50 pb-safe">
+          {/* Report Header */}
+          <div className="bg-white border-b border-gray-200">
+            <div className="max-w-xl mx-auto px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center overflow-hidden p-2">
+                  <img 
+                    src="/components/assets/Kauvery_Nalam_Logo.jpg" 
+                    alt="Kauvery Nalam Logo" 
+                    className="w-full h-full object-contain object-center scale-110"
+                    style={{ imageRendering: 'high-quality' }}
+                  />
+                </div>
+                <div>
+                  <h1 className="text-sm font-extrabold uppercase text-gray-900 leading-none mb-1">
+                    {lang === 'ta' ? 'காவேரி நலம்' : 'Kauvery Nalam'}
+                  </h1>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                    {lang === 'ta' ? 'அதிகாரப்பூர்வ மருத்துவ அறிக்கை' : 'Official Medical Report'}
+                  </p>
+                </div>
+              </div>
+              <div className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                result.zone === 'RED' ? 'bg-red-50 text-red-700 border-red-100' :
+                result.zone === 'AMBER' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                'bg-green-50 text-green-700 border-green-100'
+              }`}>
+                {result.zone === 'RED' ? (lang === 'ta' ? 'கவனம் தேவை' : 'Action Required') :
+                 result.zone === 'AMBER' ? (lang === 'ta' ? 'மிதமான ஆபத்து' : 'Moderate Risk') :
+                 (lang === 'ta' ? 'ஆரோக்கியமான நிலை' : 'Healthy')}
+              </div>
+            </div>
+          </div>
+
+          <div className="max-w-xl mx-auto px-6 py-8">
+            {/* Patient Info Card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <p className="text-[10px] uppercase font-bold text-gray-400 mb-1 flex items-center gap-1">
+                    <FileText size={10} /> {lang === 'ta' ? 'குறிப்பு எண்' : 'Reference ID'}
+                  </p>
+                  <p className="font-mono text-sm font-bold text-gray-900">{result.code}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] uppercase font-bold text-gray-400 mb-1 flex items-center justify-end gap-1">
+                    <Calendar size={10} /> {lang === 'ta' ? 'தேதி' : 'Date'}
+                  </p>
+                  <p className="font-mono text-sm font-bold text-gray-900">
+                    {new Date(result.timestamp).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Detailed Q&A List */}
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4 pl-1">
+              {lang === 'ta' ? 'மருத்துவ பதில்கள்' : 'Clinical Responses'}
+            </h3>
+            <div className="space-y-4">
+              {QUESTIONS.map((q, index) => {
+                const answer = answers[q.id];
+                if (!answer) return null;
+                
+                const optionLabel = q.options.find(opt => opt.val === answer)?.label[lang] || answer;
+
+                return (
+                  <div key={q.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <div className="flex gap-3">
+                      <span className="text-xs font-bold text-gray-300 w-5 pt-0.5">{index + 1}.</span>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800 mb-2 leading-snug">
+                          {q.label[lang]}
+                        </p>
+                        <div className="inline-block bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                          <p className="text-sm font-bold text-kauvery-primary">
+                            {optionLabel}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Result Summary */}
+            <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">
+                {lang === 'ta' ? 'மதிப்பீட்டு முடிவு' : 'Assessment Result'}
+              </h3>
+              <div className={`inline-block px-4 py-2 rounded-full text-sm font-bold ${
+                result.zone === 'RED' ? 'bg-red-50 text-red-700 border border-red-200' :
+                result.zone === 'AMBER' ? 'bg-orange-50 text-orange-700 border border-orange-200' :
+                'bg-green-50 text-green-700 border border-green-200'
+              }`}>
+                {content.zoneTitle[lang]} - {content.subtitle[lang]}
+              </div>
+            </div>
+            
+            <div className="mt-12 text-center">
+              <p className="text-[10px] text-gray-400 font-medium max-w-xs mx-auto leading-relaxed">
+                {lang === 'ta' ? 'இந்த அறிக்கை காவேரி நலம் டிஜிட்டல் மதிப்பீட்டால் தானாக உருவாக்கப்பட்டது. இது மருத்துவரின் முறையான நோயறிதலுக்கு மாற்றாகாது.' : 'This report is automatically generated by Kauvery Nalam Digital Assessment. It does not replace a doctor\'s formal diagnosis.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </motion.div>
   );
