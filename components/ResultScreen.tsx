@@ -785,7 +785,7 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
                           {q.label[lang]}
                         </p>
                         <div className="inline-block bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                          <p className="text-sm font-bold text-kauvery-primary">
+                          <p className="text-sm font-bold" style={{ color: '#E6004C' }}>
                             {optionLabel}
                           </p>
                         </div>
