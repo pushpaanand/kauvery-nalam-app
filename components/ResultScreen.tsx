@@ -155,7 +155,10 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
       reportElement.style.zIndex = '9999';
       reportElement.style.width = '800px';
       
-      // Wait longer for content to fully render, especially for images and text
+      // Wait for fonts and content to fully render
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // Debug: Check if answers are in the DOM
