@@ -36,6 +36,7 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
   const [showConfetti, setShowConfetti] = useState(false);
   const [qrUrl, setQrUrl] = useState('');
   const [reportLink, setReportLink] = useState('');
+  const [reportAnswers, setReportAnswers] = useState<(string | null)[]>(QUESTIONS.map(() => null));
   const [isQrZoomed, setIsQrZoomed] = useState(false);
   const [copied, setCopied] = useState(false);
   const [priorityCodeCopied, setPriorityCodeCopied] = useState(false);
@@ -75,6 +76,7 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
     const generateQR = async () => {
       // 1. Compress Data
       const compressedAnswers = QUESTIONS.map(q => answers[q.id] || null);
+      setReportAnswers(compressedAnswers);
 
       const reportPayload = {
         v: 1, 
@@ -782,13 +784,13 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
             </h3>
             <div className="space-y-4">
               {QUESTIONS.map((q, index) => {
-                // Use EXACT same logic as ReportView - get answer from object by question ID
-                const answer = answers[q.id];
+                // Use the same compressed answers array as the QR report payload
+                const answer = reportAnswers[index] ?? answers[q.id];
                 
-                // Skip if answer is missing (EXACT same as ReportView)
+                // Skip if answer is missing (same as ReportView)
                 if (!answer) return null;
                 
-                // Find full label of answer for display (EXACT same as ReportView)
+                // Find full label of answer for display (same as ReportView)
                 const optionLabel = q.options.find(opt => opt.val === answer)?.label[lang] || answer;
 
                 return (
