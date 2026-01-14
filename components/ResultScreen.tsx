@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AssessmentResult, Language, Mode, AssessmentData } from '../types';
 import { QUESTIONS, RESULT_CONTENT } from '../constants';
 import { triggerHaptic } from '../utils/haptics';
 import QRCode from 'qrcode';
+import html2canvas from 'html2canvas';
 import { 
   AlertTriangle, 
   RotateCcw, 
@@ -16,7 +17,8 @@ import {
   User,
   Users,
   Clock,
-  MessageCircle
+  MessageCircle,
+  Download
 } from 'lucide-react';
 
 interface Props {
@@ -34,10 +36,12 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
   const [reportLink, setReportLink] = useState('');
   const [isQrZoomed, setIsQrZoomed] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [priorityCodeCopied, setPriorityCodeCopied] = useState(false);
+  const resultContainerRef = useRef<HTMLDivElement>(null);
 
   const content = RESULT_CONTENT[result.zone];
   const userLabel = mode === 'self' 
-    ? (lang === 'ta' ? 'பயனர் (Self)' : 'Self') 
+    ? (lang === 'ta' ? 'நீங்கள்' : 'Self') 
     : (lang === 'ta' ? 'பெற்றோர் (Parent)' : 'Parent');
 
   // Helper: Unicode-safe Base64 Encode
@@ -93,12 +97,38 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
     }
   }, [result.zone, result.code, answers, lang, result.timestamp]);
 
-  const handleCopyLink = () => {
-    if (reportLink) {
-      navigator.clipboard.writeText(reportLink).then(() => {
+  const handleDownloadReport = async () => {
+    if (!resultContainerRef.current) return;
+    
+    triggerHaptic('medium');
+    
+    try {
+      const canvas = await html2canvas(resultContainerRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        logging: false
+      });
+      
+      // Create download link
+      const link = document.createElement('a');
+      link.download = `Kauvery-Nalam-Report-${result.code}-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      
+      triggerHaptic('success');
+    } catch (error) {
+      console.error('Download failed', error);
+      triggerHaptic('error');
+    }
+  };
+
+  const handleCopyPriorityCode = () => {
+    if (result.code) {
+      navigator.clipboard.writeText(result.code).then(() => {
         triggerHaptic('success');
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        setPriorityCodeCopied(true);
+        setTimeout(() => setPriorityCodeCopied(false), 2000);
       }).catch(err => console.error('Copy failed', err));
     }
   };
@@ -113,6 +143,46 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
     const message = lang === 'ta' 
       ? `காவேரி நலம் - சிறுநீரக நல மதிப்பீடு\n\n${siteUrl}`
       : `Kauvery Nalam - Kidney Health Assessment\n\n${siteUrl}`;
+    
+    // Open WhatsApp with the message
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const handleShareReportViaWhatsApp = () => {
+    if (!reportLink) return;
+    
+    triggerHaptic('medium');
+    
+    // Determine risk level based on zone
+    let riskLevel = '';
+    if (result.zone === 'RED') {
+      riskLevel = lang === 'ta' ? 'அதிக ஆபத்து (HIGH RISK)' : 'HIGH RISK';
+    } else if (result.zone === 'AMBER') {
+      riskLevel = lang === 'ta' ? 'மிதமான ஆபத்து (MODERATE RISK)' : 'MODERATE RISK';
+    } else {
+      riskLevel = lang === 'ta' ? 'குறைந்த ஆபத்து (LOW RISK)' : 'LOW RISK';
+    }
+    
+    // Build the message
+    let message = '';
+    if (lang === 'ta') {
+      message = `எனது காவேரி சிறுநீரக ஆபத்து மதிப்பீட்டு முடிவுகள்:\n\n`;
+      message += `ஆபத்து நிலை: ${riskLevel}\n`;
+      message += `முன்னுரிமை குறியீடு: ${result.code}\n`;
+      if (result.zone === 'RED' && content.timeSlot) {
+        message += `மருத்துவமனை பதிவு: ${content.timeSlot[lang]}\n`;
+      }
+      message += `\nமுழு அறிக்கையைக் காண: ${reportLink}`;
+    } else {
+      message = `My Kauvery Kidney Risk Assessment Results:\n\n`;
+      message += `Risk Level: ${riskLevel}\n`;
+      message += `Priority Code: ${result.code}\n`;
+      if (result.zone === 'RED' && content.timeSlot) {
+        message += `Clinic Appointment: ${content.timeSlot[lang]}\n`;
+      }
+      message += `\nView full report: ${reportLink}`;
+    }
     
     // Open WhatsApp with the message
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
@@ -149,25 +219,32 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
       {/* Share Section */}
       <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm mb-4">
         <p className="text-xs font-bold text-gray-600 mb-3 text-center uppercase tracking-wider">
-          {lang === 'ta' ? 'பகிரவும்' : 'Share Assessment'}
+          {lang === 'ta' ? 'WhatsApp பகிரும் செய்தி' : 'WhatsApp share message'}
         </p>
-          <div className="flex gap-2">
+          <div className="space-y-2">
             <button
               onClick={handleWhatsAppShare}
-              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-xl text-sm font-bold transition-colors shadow-md active:scale-95"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-xl text-sm font-bold transition-colors shadow-md active:scale-95"
             >
               <MessageCircle size={16} />
-              {lang === 'ta' ? 'WhatsApp பகிரவும்' : 'Share via WhatsApp'}
+              {lang === 'ta' ? 'WhatsApp மூலம் இணைப்பு பகிரவும்' : 'Share link via WhatsApp'}
             </button>
             {reportLink && (
               <button
-                onClick={handleCopyLink}
-                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl text-sm font-bold transition-colors border border-gray-200 active:scale-95"
+                onClick={handleShareReportViaWhatsApp}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#25D366] hover:bg-[#20BA5A] text-white rounded-xl text-sm font-bold transition-colors shadow-md active:scale-95"
               >
-                {copied ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
-                {copied ? (lang === 'ta' ? 'நகலெடுக்கப்பட்டது' : 'Copied') : (lang === 'ta' ? 'நகலெடு' : 'Copy Report')}
+                <MessageCircle size={16} />
+                {lang === 'ta' ? 'WhatsApp மூலம் அறிக்கை பகிரவும்' : 'Share report via WhatsApp'}
               </button>
             )}
+            <button
+              onClick={handleDownloadReport}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl text-sm font-bold transition-colors border border-gray-200 active:scale-95"
+            >
+              <Download size={16} />
+              {lang === 'ta' ? 'அறிக்கையைப் பதிவிறக்கவும்' : 'Download report'}
+            </button>
           </div>
         </div>
 
@@ -221,6 +298,7 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
 
   return (
     <motion.div 
+      ref={resultContainerRef}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="pb-10 relative"
@@ -302,76 +380,107 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
       {/* === RED ZONE LAYOUT === */}
       {result.zone === 'RED' && (
         <>
-           <div className="perspective-1000 mb-6">
-            <motion.div 
-              initial={{ rotateX: 10, opacity: 0, y: 20 }}
-              animate={{ rotateX: 0, opacity: 1, y: 0 }}
-              className="relative w-full rounded-[1.5rem] bg-gradient-to-br from-[#D32F2F] to-[#B71C1C] text-white shadow-2xl shadow-red-500/30 overflow-hidden flex flex-col"
-            >
-              {/* Header */}
-              <div className="p-6 flex items-start justify-between border-b border-white/10">
-                <div className="flex items-center gap-3">
-                   <div className="bg-white/20 p-3 rounded-lg backdrop-blur-md">
-                     <img 
-                       src="/components/assets/Kauvery_Nalam_Logo.jpg" 
-                       alt="Kauvery Nalam Logo" 
-                       className="w-10 h-10 object-contain object-center scale-110"
-                       style={{ imageRendering: 'high-quality' }}
-                     />
-                   </div>
-                   <div>
-                     <div className="flex items-center gap-2">
-                       <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse border border-white"></div>
-                       <h2 className="text-[10px] font-bold uppercase tracking-widest opacity-90">Priority Pass</h2>
-                     </div>
-                     <h1 className="text-lg font-extrabold leading-tight">{content.title[lang]}</h1>
-                   </div>
-                </div>
-                <button 
-                  onClick={() => setIsQrZoomed(true)} 
-                  className="bg-white p-1 rounded-lg shadow-sm active:scale-95 transition-transform"
-                >
-                  {qrUrl && <img src={qrUrl} alt="QR" className="w-10 h-10 object-contain rounded" />}
-                </button>
-              </div>
+           {/* 1. Risk Level Banner (BIGGEST) */}
+           <motion.div 
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             className="text-center mb-8"
+           >
+             <div className="inline-flex items-center justify-center bg-gradient-to-br from-[#D32F2F] to-[#B71C1C] text-white px-8 py-6 rounded-2xl shadow-2xl shadow-red-500/30 mb-4">
+               <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                 {content.zoneTitle[lang]}
+               </h1>
+             </div>
+           </motion.div>
 
-              {/* Body */}
-              <div className="p-6 space-y-4 bg-white/5">
-                <div className="flex justify-between items-center bg-black/20 p-3 rounded-xl border border-white/5">
-                  <span className="text-xs font-medium opacity-80">Zone</span>
-                  <span className="text-sm font-bold">{content.zoneTitle[lang]}</span>
-                </div>
-                <div className="flex justify-between items-center bg-black/20 p-3 rounded-xl border border-white/5">
-                   <span className="text-xs font-medium opacity-80">For</span>
-                   <span className="text-sm font-bold flex items-center gap-2">
-                     <User size={14} /> {userLabel}
-                   </span>
-                </div>
-                <div className="flex justify-between items-center bg-black/20 p-3 rounded-xl border border-white/5">
-                   <span className="text-xs font-medium opacity-80">Priority Code</span>
-                   <span className="text-lg font-mono font-bold tracking-wider text-yellow-300">{result.code}</span>
-                </div>
-                
-                {/* Time Slot Box */}
-                <div className="bg-white/10 rounded-xl p-4 border border-white/20">
-                   <div className="flex items-center gap-2 mb-1 opacity-80">
-                     <Clock size={12} />
-                     <span className="text-[10px] font-bold uppercase tracking-wider">{content.timeSlotLabel[lang]}</span>
+           {/* 2. What This Means */}
+           <motion.div 
+             initial={{ opacity: 0, y: 10 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.1 }}
+             className="bg-red-50 rounded-2xl border-2 border-red-200 p-6 mb-6"
+           >
+             <h2 className="text-lg font-bold text-red-800 mb-2">
+               {lang === 'ta' ? 'இதன் அர்த்தம்' : 'What This Means'}
+             </h2>
+             <p className="text-base text-red-900 leading-relaxed">
+               {content.subtitle[lang]}
+             </p>
+           </motion.div>
+
+           {/* 3. Next Steps */}
+           <motion.div 
+             initial={{ opacity: 0, y: 10 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.2 }}
+             className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mb-6"
+           >
+             <h2 className="text-lg font-bold text-gray-900 mb-4">
+               {lang === 'ta' ? 'அடுத்த படிகள்' : 'Next Steps'}
+             </h2>
+             
+             <div className="space-y-4">
+               {/* Priority Code */}
+               <div className="space-y-2">
+                 <div className="flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-200">
+                   <div>
+                     <p className="text-xs font-medium text-gray-500 mb-1">
+                       {lang === 'ta' ? 'முன்னுரிமை குறியீடு' : 'Priority Code'}
+                     </p>
+                     <button
+                       onClick={handleCopyPriorityCode}
+                       className="text-xl font-mono font-bold tracking-wider text-red-600 hover:text-red-700 active:scale-95 transition-all cursor-pointer select-none"
+                     >
+                       {result.code}
+                     </button>
                    </div>
-                   <p className="font-bold text-sm leading-snug">{content.timeSlot[lang]}</p>
-                </div>
-              </div>
-            </motion.div>
-           </div>
-           
-           <div className="text-center mb-6 px-4">
-              <p className="text-sm font-medium text-gray-800 leading-relaxed whitespace-pre-line">
-                {content.instruction[lang]}
-              </p>
-           </div>
-           
-           <div className="h-px bg-gray-200 w-full mb-6"></div>
-           
+                   <button
+                     onClick={() => setIsQrZoomed(true)} 
+                     className="bg-gray-100 p-2 rounded-lg shadow-sm active:scale-95 transition-transform"
+                   >
+                     {qrUrl && <img src={qrUrl} alt="QR" className="w-12 h-12 object-contain rounded" />}
+                   </button>
+                 </div>
+                 <p className="text-xs text-gray-500 text-center">
+                   {lang === 'ta' ? 'குறியீட்டை நகலெடுக்க தட்டவும்' : 'Tap code to copy to clipboard'}
+                 </p>
+               </div>
+
+               {/* Time Slot */}
+               <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                 <div className="flex items-center gap-2 mb-2">
+                   <Clock size={16} className="text-blue-600" />
+                   <span className="text-sm font-bold text-blue-800">{content.timeSlotLabel[lang]}</span>
+                 </div>
+                 <p className="font-bold text-base text-blue-900 leading-snug">{content.timeSlot[lang]}</p>
+               </div>
+
+               {/* Clinic Instruction */}
+               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                 <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
+                   {content.instruction[lang]}
+                 </p>
+               </div>
+             </div>
+           </motion.div>
+
+           {/* Toast Notification for Priority Code Copy */}
+           <AnimatePresence>
+             {priorityCodeCopied && (
+               <motion.div
+                 initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                 animate={{ opacity: 1, y: 0, scale: 1 }}
+                 exit={{ opacity: 0, y: 20, scale: 0.9 }}
+                 transition={{ duration: 0.2 }}
+                 className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2"
+               >
+                 <Check size={18} />
+                 <span className="font-bold text-sm">{lang === 'ta' ? 'நகலெடுக்கப்பட்டது!' : 'Copied!'}</span>
+               </motion.div>
+             )}
+           </AnimatePresence>
+
+           {/* 4. Detailed Instructions */}
            <SafetySection title={content.safetyTitle[lang]} list={content.safetyPoints} />
         </>
       )}
@@ -382,13 +491,11 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
            <motion.div 
              initial={{ scale: 0.95, opacity: 0 }}
              animate={{ scale: 1, opacity: 1 }}
-             className="bg-white rounded-[2rem] shadow-xl shadow-orange-500/10 border border-orange-100 overflow-hidden mb-6"
+             className="bg-white rounded-[2rem] shadow-xl shadow-[#FF9800]/10 border border-[#FF9800]/20 overflow-hidden mb-6"
            >
-              <div className="bg-[#FFF8E1] p-6 text-center border-b border-orange-100">
-                 <h1 className="text-2xl font-extrabold text-[#F57C00] mb-2">{content.badge[lang]}</h1>
-                 <p className="text-sm font-bold text-gray-700">{content.title[lang]}</p>
-              </div>
-              <div className="p-6">
+              <div className="bg-[#FFF3E0] p-6 text-center border-b border-[#FF9800]/20">
+                 <h1 className="text-2xl font-extrabold text-[#FF9800] mb-2">{content.zoneTitle[lang]}</h1>
+                 <p className="text-sm font-bold text-gray-700 mb-4">{content.subtitle[lang]}</p>
                  {/* Markdown-ish rendering for bold text */}
                  <p className="text-sm text-gray-800 leading-relaxed text-center whitespace-pre-line">
                    {content.desc[lang].split('**').map((part: string, i: number) => 
@@ -408,18 +515,15 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
            <motion.div 
              initial={{ scale: 0.9, opacity: 0 }}
              animate={{ scale: 1, opacity: 1 }}
-             className="text-center mb-8"
+             className="bg-white rounded-[2rem] shadow-xl shadow-green-500/10 border border-green-100 overflow-hidden mb-6"
            >
-              <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-6 py-2 rounded-full font-bold text-sm mb-4 border border-green-200 shadow-sm">
-                <ShieldCheck size={18} />
-                {content.badge[lang]} – Kauvery Nalam 2025
+              <div className="bg-green-50 p-6 text-center border-b border-green-100">
+                 <h1 className="text-2xl font-extrabold text-green-700 mb-2">{content.zoneTitle[lang]}</h1>
+                 <p className="text-sm font-bold text-gray-700 mb-4">{content.subtitle[lang]}</p>
+                 <p className="text-sm text-gray-800 leading-relaxed text-center whitespace-pre-line">
+                   {content.desc[lang]}
+                 </p>
               </div>
-              <h1 className="text-3xl font-extrabold text-green-700 mb-2 tracking-tight">
-                 {content.title[lang]}
-              </h1>
-              <p className="text-sm text-gray-600 leading-relaxed max-w-xs mx-auto whitespace-pre-line">
-                 {content.desc[lang]}
-              </p>
            </motion.div>
 
            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
@@ -434,6 +538,23 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
                  ))}
               </ul>
            </div>
+
+           {/* Important Notice Section */}
+           {content.importantNoticeHeader && (
+              <div className="bg-red-50/80 rounded-2xl border-2 border-red-200 p-6 mb-6 shadow-sm">
+                 <h3 className="text-sm font-bold text-red-800 mb-4 flex items-center gap-2">
+                    <AlertTriangle size={16} className="text-red-600" />
+                    {content.importantNoticeHeader[lang]}
+                 </h3>
+                 <ul className="space-y-2.5">
+                    {content.importantNoticePoints.map((point: any, i: number) => (
+                       <li key={i} className="text-xs text-red-900 leading-relaxed font-medium">
+                          {point[lang]}
+                       </li>
+                    ))}
+                 </ul>
+              </div>
+           )}
 
            <div className="bg-blue-50/50 rounded-2xl border border-blue-100 p-5 mb-6">
               <h4 className="text-xs font-bold text-blue-800 mb-2">

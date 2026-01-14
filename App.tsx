@@ -171,13 +171,27 @@ const App: React.FC = () => {
 
     if (isRed) return 'RED';
 
+    // Special rule: If user has Diabetes (Q3) AND selects "Trace" (Q15), result must be AMBER
+    const hasDiabetes = data.q3 && data.q3 !== 'No';
+    const hasTrace = data.q15 === 'Trace';
+    if (hasDiabetes && hasTrace) {
+      return 'AMBER';
+    }
+
+    // Q15 logic: None = Green (doesn't contribute to risk), Trace/1+/2+/3+ = Risk
+    // If Q15 is None, it doesn't add to risk, so we continue with other checks
+    // If Q15 is Trace/1+/2+/3+, it contributes to risk (AMBER)
+    const hasUrineProteinRisk = data.q15 && 
+      (data.q15 === 'Trace' || data.q15 === '1+' || data.q15 === '2+' || data.q15 === '3+');
+
     const isAmber = 
       (data.q3 && data.q3 !== 'No') ||
       data.q4 === 'Yes' ||
       data.q5 === 'Yes' ||
       (data.q9 && data.q9 !== 'No') ||
       data.q11 === 'Yes' ||
-      data.q1 === 'Above 60';
+      data.q1 === 'Above 60' ||
+      hasUrineProteinRisk;
 
     if (isAmber) return 'AMBER';
 
@@ -481,6 +495,8 @@ const App: React.FC = () => {
                     currentVal={state.answers[currentQ.id]}
                     isFirst={false} // Since we always have InfoForm before, technically never "First" screen
                     direction={direction}
+                    currentQuestion={state.step + 1}
+                    totalQuestions={QUESTIONS.length}
                   />
                 </AnimatePresence>
               </div>

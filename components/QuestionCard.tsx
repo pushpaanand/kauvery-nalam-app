@@ -14,6 +14,8 @@ interface Props {
   currentVal?: string;
   isFirst: boolean;
   direction: number; // 1 for forward, -1 for back
+  currentQuestion: number; // Current question number (1-based)
+  totalQuestions: number; // Total number of questions
 }
 
 // Improved Slide Variants using percentages for better responsiveness
@@ -54,7 +56,7 @@ const itemVariants = {
   })
 };
 
-export const QuestionCard: React.FC<Props> = ({ question, lang, onAnswer, onBack, onNext, currentVal, isFirst, direction }) => {
+export const QuestionCard: React.FC<Props> = ({ question, lang, onAnswer, onBack, onNext, currentVal, isFirst, direction, currentQuestion, totalQuestions }) => {
   
   const handleOptionClick = (val: string) => {
     triggerHaptic('light');
@@ -82,6 +84,13 @@ export const QuestionCard: React.FC<Props> = ({ question, lang, onAnswer, onBack
       className="flex flex-col h-full w-full"
     >
       <div className="flex-1 overflow-y-auto pb-24 no-scrollbar px-1">
+        {/* Progress Indicator */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-4">
+          <p className="text-sm font-bold text-gray-500">
+            {lang === 'ta' ? `கேள்வி ${currentQuestion} / ${totalQuestions}` : `Question ${currentQuestion} of ${totalQuestions}`}
+          </p>
+        </motion.div>
+        
         {/* Header Section */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6">
           <h3 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-4 leading-tight tracking-tight">
