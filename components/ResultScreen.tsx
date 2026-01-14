@@ -767,25 +767,25 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
             </h3>
             <div className="space-y-4">
               {QUESTIONS.map((q, index) => {
-                // Use same logic as ReportView - get answer from object by question ID
+                // Use EXACT same logic as ReportView - get answer from object by question ID
                 const answer = answers[q.id];
                 
-                // Skip if answer is missing (same as ReportView)
+                // Skip if answer is missing (EXACT same as ReportView)
                 if (!answer) return null;
                 
-                // Find full label of answer for display (same as ReportView)
+                // Find full label of answer for display (EXACT same as ReportView)
                 const optionLabel = q.options.find(opt => opt.val === answer)?.label[lang] || answer;
 
                 return (
                   <div key={q.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
                     <div className="flex gap-3">
-                      <span className="text-xs font-bold text-gray-300 w-5 pt-0.5 flex-shrink-0">{index + 1}.</span>
-                      <div className="flex-1 min-w-0">
+                      <span className="text-xs font-bold text-gray-300 w-5 pt-0.5">{index + 1}.</span>
+                      <div>
                         <p className="text-sm font-semibold text-gray-800 mb-2 leading-snug">
                           {q.label[lang]}
                         </p>
                         <div className="inline-block bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                          <p className="text-sm font-bold text-kauvery-primary break-words">
+                          <p className="text-sm font-bold text-kauvery-primary">
                             {optionLabel}
                           </p>
                         </div>
