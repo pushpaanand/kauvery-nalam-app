@@ -133,6 +133,17 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
       console.log('Downloading report - Answers:', answers);
       console.log('Downloading report - Answer count:', Object.keys(answers).length);
       
+      // Verify answers are present
+      const answerCount = Object.keys(answers).filter(key => answers[key]).length;
+      console.log('Downloading report - Non-empty answers:', answerCount);
+      
+      if (answerCount === 0) {
+        console.warn('WARNING: No answers found in answers object!');
+        alert('No answers found. Please ensure you have completed the assessment.');
+        reportElement.style.cssText = originalStyle;
+        return;
+      }
+      
       reportElement.style.position = 'fixed';
       reportElement.style.left = '0';
       reportElement.style.top = '0';
@@ -140,8 +151,8 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
       reportElement.style.zIndex = '9999';
       reportElement.style.width = '800px';
       
-      // Wait a bit for content to render
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait longer for content to fully render, especially for images and text
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       const canvas = await html2canvas(reportElement, {
         backgroundColor: '#ffffff',
@@ -756,21 +767,14 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
             </h3>
             <div className="space-y-4">
               {QUESTIONS.map((q, index) => {
+                // Use same logic as ReportView - get answer from object by question ID
                 const answer = answers[q.id];
-                // Only skip if answer is truly missing (undefined or null, but allow empty string)
-                if (answer === undefined || answer === null || answer === '') {
-                  return null;
-                }
                 
-                // Find matching option - try exact match first, then case-insensitive
-                const foundOption = q.options.find(opt => 
-                  opt.val === answer || 
-                  opt.val.toLowerCase() === answer.toLowerCase() ||
-                  String(opt.val) === String(answer)
-                );
+                // Skip if answer is missing (same as ReportView)
+                if (!answer) return null;
                 
-                // Get label from option, or fallback to raw answer value
-                const optionLabel = foundOption?.label?.[lang] || foundOption?.label?.en || answer;
+                // Find full label of answer for display (same as ReportView)
+                const optionLabel = q.options.find(opt => opt.val === answer)?.label[lang] || answer;
 
                 return (
                   <div key={q.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
