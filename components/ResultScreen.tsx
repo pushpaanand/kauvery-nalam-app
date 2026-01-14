@@ -47,6 +47,22 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
     ? (lang === 'ta' ? 'நீங்கள்' : 'Self') 
     : (lang === 'ta' ? 'பெற்றோர் (Parent)' : 'Parent');
 
+  // Debug: Log answers when component renders
+  useEffect(() => {
+    console.log('ResultScreen - Answers received:', answers);
+    console.log('ResultScreen - Answer keys:', Object.keys(answers));
+    console.log('ResultScreen - Total answers:', Object.keys(answers).length);
+    QUESTIONS.forEach((q, idx) => {
+      const answer = answers[q.id];
+      if (answer) {
+        const found = q.options.find(opt => opt.val === answer);
+        console.log(`Q${idx + 1} (${q.id}): answer="${answer}", found=${!!found}`);
+      } else {
+        console.log(`Q${idx + 1} (${q.id}): NO ANSWER`);
+      }
+    });
+  }, [answers]);
+
   // Helper: Unicode-safe Base64 Encode
   const unicodeSafeBtoa = (str: string) => {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
@@ -101,7 +117,10 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
   }, [result.zone, result.code, answers, lang, result.timestamp]);
 
   const handleDownloadReport = async () => {
-    if (!reportContainerRef.current) return;
+    if (!reportContainerRef.current) {
+      console.error('Report container ref is null');
+      return;
+    }
     
     triggerHaptic('medium');
     
@@ -109,21 +128,31 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
       // Temporarily make the report visible for capture
       const reportElement = reportContainerRef.current;
       const originalStyle = reportElement.style.cssText;
+      
+      // Log answers for debugging
+      console.log('Downloading report - Answers:', answers);
+      console.log('Downloading report - Answer count:', Object.keys(answers).length);
+      
       reportElement.style.position = 'fixed';
       reportElement.style.left = '0';
       reportElement.style.top = '0';
       reportElement.style.visibility = 'visible';
       reportElement.style.zIndex = '9999';
+      reportElement.style.width = '800px';
+      
+      // Wait a bit for content to render
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       const canvas = await html2canvas(reportElement, {
         backgroundColor: '#ffffff',
         scale: 2,
         useCORS: true,
-        logging: false,
+        logging: true, // Enable logging to see what's being captured
         width: reportElement.scrollWidth,
         height: reportElement.scrollHeight,
         windowWidth: reportElement.scrollWidth,
-        windowHeight: reportElement.scrollHeight
+        windowHeight: reportElement.scrollHeight,
+        allowTaint: true
       });
       
       // Restore original style
@@ -711,7 +740,11 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
                     <Calendar size={10} /> {lang === 'ta' ? 'தேதி' : 'Date'}
                   </p>
                   <p className="font-mono text-sm font-bold text-gray-900">
-                    {new Date(result.timestamp).toLocaleDateString()}
+                    {new Date(result.timestamp).toLocaleDateString(lang === 'ta' ? 'ta-IN' : 'en-IN', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
                   </p>
                 </div>
               </div>
@@ -724,20 +757,31 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
             <div className="space-y-4">
               {QUESTIONS.map((q, index) => {
                 const answer = answers[q.id];
-                if (!answer) return null;
+                // Only skip if answer is truly missing (undefined or null, but allow empty string)
+                if (answer === undefined || answer === null || answer === '') {
+                  return null;
+                }
                 
-                const optionLabel = q.options.find(opt => opt.val === answer)?.label[lang] || answer;
+                // Find matching option - try exact match first, then case-insensitive
+                const foundOption = q.options.find(opt => 
+                  opt.val === answer || 
+                  opt.val.toLowerCase() === answer.toLowerCase() ||
+                  String(opt.val) === String(answer)
+                );
+                
+                // Get label from option, or fallback to raw answer value
+                const optionLabel = foundOption?.label?.[lang] || foundOption?.label?.en || answer;
 
                 return (
                   <div key={q.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
                     <div className="flex gap-3">
-                      <span className="text-xs font-bold text-gray-300 w-5 pt-0.5">{index + 1}.</span>
-                      <div>
+                      <span className="text-xs font-bold text-gray-300 w-5 pt-0.5 flex-shrink-0">{index + 1}.</span>
+                      <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-800 mb-2 leading-snug">
                           {q.label[lang]}
                         </p>
                         <div className="inline-block bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                          <p className="text-sm font-bold text-kauvery-primary">
+                          <p className="text-sm font-bold text-kauvery-primary break-words">
                             {optionLabel}
                           </p>
                         </div>
