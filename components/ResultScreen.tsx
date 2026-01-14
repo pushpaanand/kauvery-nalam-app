@@ -155,7 +155,8 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // Debug: Check if answers are in the DOM
-      const answerElements = reportElement.querySelectorAll('[style*="color: rgb(230, 0, 76)"]');
+      // Detect answer nodes by class instead of color to avoid selector misses
+      const answerElements = reportElement.querySelectorAll('.answer-text');
       console.log('Downloading report - Answer elements found in DOM:', answerElements.length);
       
       // Debug: Check text content
@@ -430,7 +431,7 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
 
               <div className="flex gap-2 w-full mb-4">
                 <button
-                  onClick={handleCopyLink}
+                  // onClick={handleCopyLink}
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl text-xs font-bold transition-colors border border-gray-200"
                 >
                   {copied ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
@@ -800,7 +801,7 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
                         </p>
                         <div className="inline-block bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-inner">
                           <p
-                            className="text-base font-extrabold leading-relaxed"
+                            className="answer-text text-base font-extrabold leading-relaxed"
                             style={{ color: '#111827', textShadow: '0 0 0 #111827' }}
                           >
                             {optionLabel}
