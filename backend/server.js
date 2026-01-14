@@ -48,6 +48,19 @@ const log = (...args) => {
 
 const app = express();
 app.use(cors());
+
+// Initialize daily report cron job (only if email is configured)
+if (process.env.SMTP_USER && process.env.REPORT_EMAIL_TO) {
+  try {
+    const { scheduleDailyReport } = require('./dailyReport');
+    scheduleDailyReport();
+    log('Daily report cron job initialized');
+  } catch (err) {
+    console.error('Failed to initialize daily report cron:', err);
+  }
+} else {
+  log('Daily report cron job skipped (email not configured)');
+}
 app.use(express.json());
 
 // CRM config — keep secrets out of code; set via env vars.
