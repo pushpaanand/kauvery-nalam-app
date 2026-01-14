@@ -152,7 +152,21 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
       reportElement.style.width = '800px';
       
       // Wait longer for content to fully render, especially for images and text
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Debug: Check if answers are in the DOM
+      const answerElements = reportElement.querySelectorAll('[style*="color: rgb(230, 0, 76)"]');
+      console.log('Downloading report - Answer elements found in DOM:', answerElements.length);
+      
+      // Debug: Check text content
+      QUESTIONS.forEach((q, idx) => {
+        const answer = answers[q.id];
+        if (answer) {
+          const found = q.options.find(opt => opt.val === answer);
+          const label = found?.label[lang] || answer;
+          console.log(`Q${idx + 1} answer text should be: "${label}"`);
+        }
+      });
       
       const canvas = await html2canvas(reportElement, {
         backgroundColor: '#ffffff',
@@ -785,7 +799,7 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
                           {q.label[lang]}
                         </p>
                         <div className="inline-block bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                          <p className="text-sm font-bold" style={{ color: '#E6004C' }}>
+                          <p className="text-sm font-bold text-gray-900" style={{ color: '#111827' }}>
                             {optionLabel}
                           </p>
                         </div>
