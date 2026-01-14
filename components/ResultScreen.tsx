@@ -77,6 +77,8 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
       // 1. Compress Data
       const compressedAnswers = QUESTIONS.map(q => answers[q.id] || null);
       setReportAnswers(compressedAnswers);
+      console.log('Render Debug -> compressedAnswers (by index):', compressedAnswers);
+      console.log('Render Debug -> answers (by id):', answers);
 
       const reportPayload = {
         v: 1, 
@@ -160,6 +162,9 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
       // Detect answer nodes by class instead of color to avoid selector misses
       const answerElements = reportElement.querySelectorAll('.answer-text');
       console.log('Downloading report - Answer elements found in DOM:', answerElements.length);
+      answerElements.forEach((el, idx) => {
+        console.log(`Downloading report - Answer DOM [${idx}]:`, (el as HTMLElement).innerText);
+      });
       
       // Debug: Check text content
       QUESTIONS.forEach((q, idx) => {
@@ -792,6 +797,9 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
                 
                 // Find full label of answer for display (same as ReportView)
                 const optionLabel = q.options.find(opt => opt.val === answer)?.label[lang] || answer;
+                
+                // Debug: log what will render
+                console.log(`Render Debug -> Q${index + 1} (${q.id}) label:`, q.label[lang], 'answer:', answer, 'optionLabel:', optionLabel);
 
                 return (
                   <div key={q.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
