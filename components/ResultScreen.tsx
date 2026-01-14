@@ -505,6 +505,31 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
 
            {/* 4. Detailed Instructions */}
            <SafetySection title={content.safetyTitle[lang]} list={content.safetyPoints} />
+
+           {/* Important Notice Section */}
+           {content.importantNoticeHeader && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-red-50/80 rounded-2xl border-2 border-red-200 p-6 mb-6 shadow-sm"
+              >
+                 <h3 className="text-sm font-bold text-red-800 mb-4 flex items-center gap-2">
+                    <AlertTriangle size={16} className="text-red-600" />
+                    {content.importantNoticeHeader[lang]}
+                 </h3>
+                 <ul className="space-y-2.5">
+                    {content.importantNoticePoints.map((point: any, i: number) => (
+                       <li key={i} className="text-xs text-red-900 leading-relaxed font-medium">
+                          {point[lang]}
+                       </li>
+                    ))}
+                 </ul>
+                 <p className="text-xs text-red-800 font-semibold mt-4 pt-4 border-t border-red-200">
+                    {lang === 'ta' ? 'இந்த அறிகுறிகள் உங்கள் ஆபத்து மதிப்பெண்ணைப் பொருட்படுத்தாமல் உடனடி மருத்துவ பராமரிப்பு தேவை.' : 'These symptoms require urgent care regardless of your risk score.'}
+                 </p>
+              </motion.div>
+           )}
         </>
       )}
 
@@ -529,6 +554,31 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
            </motion.div>
 
            <SafetySection title={content.safetyTitle[lang]} list={content.safetyPoints} />
+
+           {/* Important Notice Section */}
+           {content.importantNoticeHeader && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-red-50/80 rounded-2xl border-2 border-red-200 p-6 mb-6 shadow-sm"
+              >
+                 <h3 className="text-sm font-bold text-red-800 mb-4 flex items-center gap-2">
+                    <AlertTriangle size={16} className="text-red-600" />
+                    {content.importantNoticeHeader[lang]}
+                 </h3>
+                 <ul className="space-y-2.5">
+                    {content.importantNoticePoints.map((point: any, i: number) => (
+                       <li key={i} className="text-xs text-red-900 leading-relaxed font-medium">
+                          {point[lang]}
+                       </li>
+                    ))}
+                 </ul>
+                 <p className="text-xs text-red-800 font-semibold mt-4 pt-4 border-t border-red-200">
+                    {lang === 'ta' ? 'இந்த அறிகுறிகள் உங்கள் ஆபத்து மதிப்பெண்ணைப் பொருட்படுத்தாமல் உடனடி மருத்துவ பராமரிப்பு தேவை.' : 'These symptoms require urgent care regardless of your risk score.'}
+                 </p>
+              </motion.div>
+           )}
         </>
       )}
 
@@ -564,7 +614,12 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
 
            {/* Important Notice Section */}
            {content.importantNoticeHeader && (
-              <div className="bg-red-50/80 rounded-2xl border-2 border-red-200 p-6 mb-6 shadow-sm">
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-red-50/80 rounded-2xl border-2 border-red-200 p-6 mb-6 shadow-sm"
+              >
                  <h3 className="text-sm font-bold text-red-800 mb-4 flex items-center gap-2">
                     <AlertTriangle size={16} className="text-red-600" />
                     {content.importantNoticeHeader[lang]}
@@ -576,7 +631,10 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
                        </li>
                     ))}
                  </ul>
-              </div>
+                 <p className="text-xs text-red-800 font-semibold mt-4 pt-4 border-t border-red-200">
+                    {lang === 'ta' ? 'இந்த அறிகுறிகள் உங்கள் ஆபத்து மதிப்பெண்ணைப் பொருட்படுத்தாமல் உடனடி மருத்துவ பராமரிப்பு தேவை.' : 'These symptoms require urgent care regardless of your risk score.'}
+                 </p>
+              </motion.div>
            )}
 
            <div className="bg-blue-50/50 rounded-2xl border border-blue-100 p-5 mb-6">
@@ -695,13 +753,126 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4">
                 {lang === 'ta' ? 'மதிப்பீட்டு முடிவு' : 'Assessment Result'}
               </h3>
-              <div className={`inline-block px-4 py-2 rounded-full text-sm font-bold ${
+              
+              {/* Risk Level */}
+              <div className={`inline-block px-4 py-2 rounded-full text-sm font-bold mb-4 ${
                 result.zone === 'RED' ? 'bg-red-50 text-red-700 border border-red-200' :
                 result.zone === 'AMBER' ? 'bg-orange-50 text-orange-700 border border-orange-200' :
                 'bg-green-50 text-green-700 border border-green-200'
               }`}>
                 {content.zoneTitle[lang]} - {content.subtitle[lang]}
               </div>
+
+              {/* Zone-specific content */}
+              {result.zone === 'RED' && (
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <p className="text-xs font-bold text-gray-700 mb-1">{lang === 'ta' ? 'அடுத்த படிகள்' : 'Next Steps'}</p>
+                    <p className="text-sm text-gray-800">{content.instruction[lang]}</p>
+                  </div>
+                  {content.timeSlot && (
+                    <div>
+                      <p className="text-xs font-bold text-gray-700 mb-1">{content.timeSlotLabel[lang]}</p>
+                      <p className="text-sm text-gray-800">{content.timeSlot[lang]}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-xs font-bold text-gray-700 mb-2">{content.safetyTitle[lang]}</p>
+                    <ul className="space-y-2">
+                      {content.safetyPoints.map((point: any, idx: number) => (
+                        <li key={idx} className="text-xs text-gray-700">
+                          {point.label[lang] && <strong className="text-gray-900">{point.label[lang]} </strong>}
+                          {point.text[lang]}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {content.importantNoticeHeader && (
+                    <div className="bg-red-50 rounded-lg p-3 border border-red-200">
+                      <p className="text-xs font-bold text-red-800 mb-2">{content.importantNoticeHeader[lang]}</p>
+                      <ul className="space-y-1">
+                        {content.importantNoticePoints.map((point: any, idx: number) => (
+                          <li key={idx} className="text-xs text-red-900">
+                            {point[lang]}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="text-xs text-red-800 font-semibold mt-2 pt-2 border-t border-red-200">
+                        {lang === 'ta' ? 'இந்த அறிகுறிகள் உங்கள் ஆபத்து மதிப்பெண்ணைப் பொருட்படுத்தாமல் உடனடி மருத்துவ பராமரிப்பு தேவை.' : 'These symptoms require urgent care regardless of your risk score.'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {result.zone === 'AMBER' && (
+                <div className="mt-4 space-y-3">
+                  <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
+                    {content.desc[lang].split('**').map((part: string, i: number) => 
+                      i % 2 === 1 ? <strong key={i} className="text-black">{part}</strong> : part
+                    )}
+                  </p>
+                  <div>
+                    <p className="text-xs font-bold text-gray-700 mb-2">{content.safetyTitle[lang]}</p>
+                    <ul className="space-y-2">
+                      {content.safetyPoints.map((point: any, idx: number) => (
+                        <li key={idx} className="text-xs text-gray-700">
+                          {point.label[lang] && <strong className="text-gray-900">{point.label[lang]} </strong>}
+                          {point.text[lang]}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {content.importantNoticeHeader && (
+                    <div className="bg-red-50 rounded-lg p-3 border border-red-200">
+                      <p className="text-xs font-bold text-red-800 mb-2">{content.importantNoticeHeader[lang]}</p>
+                      <ul className="space-y-1">
+                        {content.importantNoticePoints.map((point: any, idx: number) => (
+                          <li key={idx} className="text-xs text-red-900">
+                            {point[lang]}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="text-xs text-red-800 font-semibold mt-2 pt-2 border-t border-red-200">
+                        {lang === 'ta' ? 'இந்த அறிகுறிகள் உங்கள் ஆபத்து மதிப்பெண்ணைப் பொருட்படுத்தாமல் உடனடி மருத்துவ பராமரிப்பு தேவை.' : 'These symptoms require urgent care regardless of your risk score.'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {result.zone === 'GREEN' && (
+                <div className="mt-4 space-y-3">
+                  <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
+                    {content.desc[lang]}
+                  </p>
+                  <div>
+                    <p className="text-xs font-bold text-gray-700 mb-2">{content.goldenRulesHeader[lang]}</p>
+                    <ul className="space-y-2">
+                      {content.goldenRules.map((rule: any, idx: number) => (
+                        <li key={idx} className="text-xs text-gray-700">
+                          {rule[lang]}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {content.importantNoticeHeader && (
+                    <div className="bg-red-50 rounded-lg p-3 border border-red-200">
+                      <p className="text-xs font-bold text-red-800 mb-2">{content.importantNoticeHeader[lang]}</p>
+                      <ul className="space-y-1">
+                        {content.importantNoticePoints.map((point: any, idx: number) => (
+                          <li key={idx} className="text-xs text-red-900">
+                            {point[lang]}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="text-xs text-red-800 font-semibold mt-2 pt-2 border-t border-red-200">
+                        {lang === 'ta' ? 'இந்த அறிகுறிகள் உங்கள் ஆபத்து மதிப்பெண்ணைப் பொருட்படுத்தாமல் உடனடி மருத்துவ பராமரிப்பு தேவை.' : 'These symptoms require urgent care regardless of your risk score.'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             
             <div className="mt-12 text-center">
