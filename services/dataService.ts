@@ -145,3 +145,33 @@ export const submitAssessment = async (
     return false;
   }
 };
+
+// Trigger daily report email
+export const triggerDailyReport = async (): Promise<{ success: boolean; message: string }> => {
+  const apiBase = (typeof import.meta !== 'undefined' && process.env.VITE_API_BASE) ? process.env.VITE_API_BASE : 'https://kauverynalam-ccechsb6dwdhc5eg.southindia-01.azurewebsites.net';
+  const apiUrl = `${apiBase}/api/trigger-daily-report`;
+
+  console.log('[triggerDailyReport] Calling API:', apiUrl);
+
+  try {
+    const resp = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    console.log('[triggerDailyReport] Response status:', resp.status);
+
+    if (!resp.ok) {
+      const text = await resp.text();
+      console.error('[triggerDailyReport] API failed', resp.status, text);
+      return { success: false, message: 'Failed to send report' };
+    }
+    
+    const data = await resp.json();
+    console.log('[triggerDailyReport] Success:', data);
+    return { success: true, message: data.message || 'Report sent successfully' };
+  } catch (error) {
+    console.error("[triggerDailyReport] Network/parse error", error);
+    return { success: false, message: 'Network error occurred' };
+  }
+};

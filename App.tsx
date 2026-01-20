@@ -9,6 +9,7 @@ import { ResultScreen } from './components/ResultScreen';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ReportView } from './components/ReportView'; // Import Report View
 import { UserInfoForm } from './components/UserInfoForm'; // Import Form
+import { DailyReportButton } from './components/DailyReportButton'; // Import Daily Report Button
 import { submitAssessment, generatePriorityCode, createUser } from './services/dataService';
 import { triggerHaptic } from './utils/haptics';
 
@@ -512,6 +513,9 @@ const App: React.FC = () => {
           )}
         </AnimatePresence>
       </main>
+
+      {/* Daily Report Button - Floating Icon */}
+      <DailyReportButton language={state.language} />
     </div>
   );
 };

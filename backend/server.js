@@ -153,6 +153,19 @@ app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'qr-backend' });
 });
 
+// Trigger daily report email manually
+app.post('/api/trigger-daily-report', async (req, res) => {
+  try {
+    log('Manual daily report trigger requested');
+    const { sendDailyReport } = require('./dailyReport');
+    await sendDailyReport();
+    return res.json({ ok: true, message: 'Daily report email sent successfully' });
+  } catch (err) {
+    console.error('Failed to trigger daily report:', err);
+    return res.status(500).json({ error: 'Failed to send daily report', details: formatError(err) });
+  }
+});
+
 // Fetch QR metadata for the frontend; used to set location/unit in sessionStorage.
 app.get('/api/qr-config', async (req, res) => {
   const { qr } = req.query;
