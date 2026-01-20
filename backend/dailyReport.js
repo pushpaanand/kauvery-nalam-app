@@ -197,8 +197,7 @@ const fetchDailyUsers = async (reportDate) => {
     const pool = await getPool();
     
     // Query to get users and their assessments for the specified date
-    // Note: If your assessment table doesn't have created_at, you may need to add it
-    // or use a different timestamp column. Check your database schema.
+    // Using submitted_at column as per database schema
     const query = `
       SELECT 
         u.id AS user_id,
@@ -208,11 +207,11 @@ const fetchDailyUsers = async (reportDate) => {
         a.priority_code,
         a.risk_zone,
         a.mode,
-        COALESCE(a.created_at, a.submitted_at, GETDATE()) AS submitted_at
+        a.submitted_at
       FROM assessment a
       INNER JOIN users u ON a.user_id = u.id
-      WHERE CAST(COALESCE(a.created_at, a.submitted_at, GETDATE()) AS DATE) = CAST(@reportDate AS DATE)
-      ORDER BY COALESCE(a.created_at, a.submitted_at, GETDATE()) DESC
+      WHERE CAST(a.submitted_at AS DATE) = CAST(@reportDate AS DATE)
+      ORDER BY a.submitted_at DESC
     `;
 
     const result = await pool.request()

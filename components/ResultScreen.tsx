@@ -469,7 +469,7 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
       {result.zone === 'RED' && (
         <>
            {/* 1. Risk Level Banner (BIGGEST) */}
-           <motion.div 
+            <motion.div 
              initial={{ opacity: 0, y: 20 }}
              animate={{ opacity: 1, y: 0 }}
              className="text-center mb-8"
@@ -478,7 +478,7 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
                  {content.zoneTitle[lang]}
                </h1>
-             </div>
+                   </div>
            </motion.div>
 
            {/* 2. What This Means */}
@@ -521,34 +521,34 @@ export const ResultScreen: React.FC<Props> = ({ result, answers, lang, mode, qrN
                      >
                        {result.code}
                      </button>
-                   </div>
-                   <button
-                     onClick={() => setIsQrZoomed(true)} 
+                </div>
+                <button 
+                  onClick={() => setIsQrZoomed(true)} 
                      className="bg-gray-100 p-2 rounded-lg shadow-sm active:scale-95 transition-transform"
-                   >
+                >
                      {qrUrl && <img src={qrUrl} alt="QR" className="w-12 h-12 object-contain rounded" />}
-                   </button>
-                 </div>
+                </button>
+              </div>
                  <p className="text-xs text-gray-500 text-center">
                    {lang === 'ta' ? 'குறியீட்டை நகலெடுக்க தட்டவும்' : 'Tap code to copy to clipboard'}
                  </p>
-               </div>
-
+                </div>
+                
                {/* Time Slot */}
                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
                  <div className="flex items-center gap-2 mb-2">
                    <Clock size={16} className="text-blue-600" />
                    <span className="text-sm font-bold text-blue-800">{content.timeSlotLabel[lang]}</span>
-                 </div>
+                   </div>
                  <p className="font-bold text-base text-blue-900 leading-snug">{content.timeSlot[lang]}</p>
-               </div>
-
+           </div>
+           
                {/* Clinic Instruction */}
                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                  <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
-                   {content.instruction[lang]}
-                 </p>
-               </div>
+                {content.instruction[lang]}
+              </p>
+           </div>
              </div>
            </motion.div>
 
