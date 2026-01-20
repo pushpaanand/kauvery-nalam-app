@@ -56,34 +56,32 @@ const getPool = async () => {
 };
 
 // Email transporter configuration
+// Using Gmail service (Google Workspace) - matches working configuration from other project
 const createTransporter = () => {
-  // For @kauveryhospital.com (likely Office 365 / Microsoft 365)
-  // Use smtp.office365.com instead of smtp.gmail.com
-  const smtpHost = process.env.SMTP_HOST || 'smtp.office365.com';
-  const smtpPort = parseInt(process.env.SMTP_PORT || '587');
-  const smtpSecure = process.env.SMTP_SECURE === 'true';
-  const smtpUser = process.env.SMTP_USER || 'productanalyst.pushpa@kauveryhospital.com';
-  const smtpPass = process.env.SMTP_PASS || 'wuno eqhf jtqt kogp';
+  const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED === 'true';
+  const smtpUser = (process.env.SMTP_USER || 'productanalyst.pushpa@kauveryhospital.com').trim();
+  const smtpPass = (process.env.SMTP_PASS || 'fprg nbfn ftat hngt').trim();
+
+  if (!smtpUser || !smtpPass) {
+    throw new Error('SMTP credentials not configured');
+  }
 
   console.log('SMTP Config:', { 
-    host: smtpHost, 
-    port: smtpPort, 
-    secure: smtpSecure,
-    user: smtpUser.replace(/(.{3})(.*)(@.*)/, '$1***$3') // Mask password in logs
+    service: 'gmail',
+    user: smtpUser.replace(/(.{3})(.*)(@.*)/, '$1***$3'), // Mask email in logs
+    rejectUnauthorized
   });
 
   return nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure: smtpSecure, // false for 587 (TLS), true for 465 (SSL)
+    service: 'gmail',
     auth: {
       user: smtpUser,
       pass: smtpPass
     },
     tls: {
-      ciphers: 'SSLv3',
-      rejectUnauthorized: false // For Office 365, sometimes needed
-    }
+      rejectUnauthorized
+    },
+    debug: process.env.SMTP_DEBUG === 'true'
   });
 };
 
@@ -266,8 +264,11 @@ const sendDailyReport = async () => {
     const transporter = createTransporter();
     const emailHTML = generateEmailHTML(reportDate, users);
     
+    const smtpUser = (process.env.SMTP_USER || 'productanalyst.pushpa@kauveryhospital.com').trim();
+    const from = process.env.SMTP_FROM || smtpUser;
+    
     const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER || 'productanalyst.pushpa@kauveryhospital.com',
+      from: from,
       to: process.env.REPORT_EMAIL_TO || 'ida@kauveryhospital.com,digitaltrichy.implementation@kauveryhospital.com', // Comma-separated list of recipients
       subject: `Kauvery Nalam - Daily Assessment Report - ${formatDate(reportDate).split(',')[0]}`,
       html: emailHTML,
