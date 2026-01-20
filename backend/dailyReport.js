@@ -17,37 +17,42 @@ const sql = require('mssql');
 const nodemailer = require('nodemailer');
 const cron = require('node-cron');
 
-// Database connection pool
-let pool = null;
-
-const getPool = async () => {
-  if (pool) return pool;
-  
-  const config = {
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    server: process.env.DB_SERVER,
-    database: process.env.DB_NAME,
-    options: {
-      encrypt: true,
-      trustServerCertificate: process.env.DB_TRUST_CERT === 'true',
-      enableArithAbort: true
-    },
-    pool: {
-      max: 10,
-      min: 0,
-      idleTimeoutMillis: 30000
-    }
-  };
-
-  try {
-    pool = await sql.connect(config);
-    console.log('Database connected for daily report');
-    return pool;
-  } catch (err) {
-    console.error('Database connection failed:', err);
-    throw err;
+// Database connection - reuse the same config as server.js
+// Use the same hardcoded values as server.js for consistency
+const sqlConfig = {
+  user: process.env.DB_USER || 'KauveryNalam',
+  password: process.env.DB_PASSWORD || 'kauvery@123',
+  server: process.env.DB_SERVER || 'kauverynalam.database.windows.net',
+  database: process.env.DB_NAME || 'kauverynalamdb',
+  options: {
+    encrypt: true,
+    trustServerCertificate: process.env.DB_TRUST_CERT === 'true',
+    enableArithAbort: true
+  },
+  pool: {
+    max: 10,
+    min: 0,
+    idleTimeoutMillis: 30000
   }
+};
+
+let poolPromise = null;
+const getPool = async () => {
+  if (!poolPromise) {
+    // Validate config before attempting connection
+    if (!sqlConfig.server || !sqlConfig.user || !sqlConfig.password || !sqlConfig.database) {
+      throw new Error('Database configuration is incomplete. Please check your .env file.');
+    }
+    try {
+      poolPromise = sql.connect(sqlConfig);
+      console.log('Database connected for daily report');
+      return poolPromise;
+    } catch (err) {
+      console.error('Database connection failed:', err);
+      throw err;
+    }
+  }
+  return poolPromise;
 };
 
 // Email transporter configuration
