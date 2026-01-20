@@ -66,13 +66,18 @@ const createTransporter = () => {
     throw new Error('SMTP credentials not configured');
   }
 
+  // Debug logging (mask sensitive data but show what we're using)
   console.log('SMTP Config:', { 
     service: 'gmail',
-    user: smtpUser.replace(/(.{3})(.*)(@.*)/, '$1***$3'), // Mask email in logs
-    rejectUnauthorized
+    user: smtpUser,
+    passLength: smtpPass.length,
+    passHasSpaces: smtpPass.includes(' '),
+    rejectUnauthorized,
+    hasEnvUser: !!process.env.SMTP_USER,
+    hasEnvPass: !!process.env.SMTP_PASS
   });
 
-  return nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: smtpUser,
@@ -83,6 +88,17 @@ const createTransporter = () => {
     },
     debug: process.env.SMTP_DEBUG === 'true'
   });
+
+  // Verify connection
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error('SMTP Verification failed:', error.message);
+    } else {
+      console.log('SMTP Server is ready to take our messages');
+    }
+  });
+
+  return transporter;
 };
 
 // Format date for SQL query (get yesterday's date)
