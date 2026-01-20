@@ -60,24 +60,19 @@ const getPool = async () => {
 const createTransporter = () => {
   const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED === 'true';
   const smtpUser = (process.env.SMTP_USER || 'productanalyst.pushpa@kauveryhospital.com').trim();
-  const smtpPass = (process.env.SMTP_PASS || 'fprg nbfn ftat hngt').trim();
+  const smtpPass = (process.env.SMTP_PASS || 'wuno eqhf jtqt kogp').trim();
 
   if (!smtpUser || !smtpPass) {
     throw new Error('SMTP credentials not configured');
   }
 
-  // Debug logging (mask sensitive data but show what we're using)
   console.log('SMTP Config:', { 
     service: 'gmail',
-    user: smtpUser,
-    passLength: smtpPass.length,
-    passHasSpaces: smtpPass.includes(' '),
-    rejectUnauthorized,
-    hasEnvUser: !!process.env.SMTP_USER,
-    hasEnvPass: !!process.env.SMTP_PASS
+    user: smtpUser.replace(/(.{3})(.*)(@.*)/, '$1***$3'), // Mask email in logs
+    rejectUnauthorized
   });
 
-  const transporter = nodemailer.createTransport({
+  return nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: smtpUser,
@@ -88,17 +83,6 @@ const createTransporter = () => {
     },
     debug: process.env.SMTP_DEBUG === 'true'
   });
-
-  // Verify connection
-  transporter.verify((error, success) => {
-    if (error) {
-      console.error('SMTP Verification failed:', error.message);
-    } else {
-      console.log('SMTP Server is ready to take our messages');
-    }
-  });
-
-  return transporter;
 };
 
 // Format date for SQL query (get yesterday's date)
