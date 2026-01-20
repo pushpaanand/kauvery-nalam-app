@@ -26,6 +26,23 @@ SMTP_FROM=Kauvery Nalam <your_email@gmail.com>
 REPORT_EMAIL_TO=recipient1@example.com,recipient2@example.com
 ```
 
+### Office 365 / Microsoft 365 Setup (for @kauveryhospital.com)
+
+For custom domain emails like `@kauveryhospital.com`, use Office 365 settings:
+
+```env
+SMTP_HOST=smtp.office365.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=productanalyst.pushpa@kauveryhospital.com
+SMTP_PASS=your_app_password_or_regular_password
+```
+
+**Important Notes:**
+1. If using regular password: Make sure the account allows "Less secure app access" or use App Password
+2. If 2FA is enabled: Generate an App Password from Microsoft Account Security settings
+3. The password should be the actual password or app password (not the Gmail app password format)
+
 ### Gmail Setup (if using Gmail)
 
 1. Enable 2-Factor Authentication on your Gmail account
@@ -33,10 +50,11 @@ REPORT_EMAIL_TO=recipient1@example.com,recipient2@example.com
    - Go to Google Account → Security → 2-Step Verification → App passwords
    - Create an app password for "Mail"
    - Use this password in `SMTP_PASS`
+3. Use `smtp.gmail.com` as SMTP_HOST
 
 ### Other Email Providers
 
-For other providers (Outlook, SendGrid, etc.), adjust:
+For other providers (SendGrid, etc.), adjust:
 - `SMTP_HOST`: Your SMTP server
 - `SMTP_PORT`: Usually 587 (TLS) or 465 (SSL)
 - `SMTP_SECURE`: true for port 465, false for port 587
