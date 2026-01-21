@@ -515,7 +515,7 @@ const App: React.FC = () => {
       </main>
 
       {/* Daily Report Button - Floating Icon */}
-      <DailyReportButton language={state.language} />
+      {/* <DailyReportButton language={state.language} /> */}
     </div>
   );
 };
